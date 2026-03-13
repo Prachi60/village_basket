@@ -1,0 +1,14 @@
+[
+  {
+    "h": "cluster0-shard-00-00.q7fbjqj.mongodb.net",
+    "err": "queryA ENODATA cluster0-shard-00-00.q7fbjqj.mongodb.net"
+  },
+  {
+    "h": "cluster0-shard-00-01.q7fbjqj.mongodb.net",
+    "err": "queryA ENODATA cluster0-shard-00-01.q7fbjqj.mongodb.net"
+  },
+  {
+    "h": "cluster0-shard-00-02.q7fbjqj.mongodb.net",
+    "err": "queryA ENODATA cluster0-shard-00-02.q7fbjqj.mongodb.net"
+  }
+]
