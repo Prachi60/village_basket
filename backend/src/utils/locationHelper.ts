@@ -21,9 +21,9 @@ export function calculateDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -48,10 +48,9 @@ export async function findSellersWithinRange(
   }
 
   try {
-    // Fetch all approved sellers with location
-    const sellers = await Seller.find({
-      status: "Approved",
-    }).select("_id location serviceRadiusKm latitude longitude");
+    // Fetch all sellers with location info (any status)
+    // Product visibility is controlled by product's status/publish fields
+    const sellers = await Seller.find({}).select("_id location serviceRadiusKm latitude longitude");
 
     // Filter sellers where user is within their service radius
     const nearbySellerIds: mongoose.Types.ObjectId[] = [];
@@ -67,8 +66,8 @@ export async function findSellersWithinRange(
       }
       // Fallback to string fields if GeoJSON missing
       else if (seller.latitude && seller.longitude) {
-         sellerLat = parseFloat(seller.latitude);
-         sellerLng = parseFloat(seller.longitude);
+        sellerLat = parseFloat(seller.latitude);
+        sellerLng = parseFloat(seller.longitude);
       }
 
       if (sellerLat !== null && sellerLng !== null && !isNaN(sellerLat) && !isNaN(sellerLng)) {
@@ -83,6 +82,10 @@ export async function findSellersWithinRange(
         if (distance <= serviceRadius) {
           nearbySellerIds.push(seller._id as mongoose.Types.ObjectId);
         }
+      } else {
+        // Seller has no location set — include them by default
+        // (can't verify distance, so we show their products rather than hide them)
+        nearbySellerIds.push(seller._id as mongoose.Types.ObjectId);
       }
     }
 

@@ -27,51 +27,24 @@ export const getProducts = async (req: Request, res: Response) => {
       status: "Active",
       publish: true,
       // Exclude shop-by-store-only products from category pages
-      $or: [
-        { isShopByStoreOnly: { $ne: true } },
-        { isShopByStoreOnly: { $exists: false } },
-      ],
+      isShopByStoreOnly: { $ne: true },
     };
 
     // Location-based filtering: Only show products from sellers within user's range
     const userLat = latitude ? parseFloat(latitude as string) : null;
     const userLng = longitude ? parseFloat(longitude as string) : null;
 
+    const nearbySellerIds: mongoose.Types.ObjectId[] = [];
     if (userLat && userLng && !isNaN(userLat) && !isNaN(userLng)) {
       // Find sellers within user's location range
-      const nearbySellerIds = await findSellersWithinRange(userLat, userLng);
+      const nearby = await findSellersWithinRange(userLat, userLng);
+      nearbySellerIds.push(...nearby);
 
-      if (nearbySellerIds.length === 0) {
-        // No sellers within range, return empty result
-        return res.status(200).json({
-          success: true,
-          data: [],
-          pagination: {
-            page: Number(page),
-            limit: Number(limit),
-            total: 0,
-            pages: 0,
-          },
-          message:
-            "No sellers available in your area. Please update your location.",
-        });
+      // Only strictly filter by seller location if we're on the main "all products" page
+      // If we're on a specific category page, we'll show all but prioritize/highlight nearby later if needed
+      if (!category && !subcategory && !search && nearbySellerIds.length > 0) {
+        query.seller = { $in: nearbySellerIds };
       }
-
-      // Filter products by sellers within range
-      query.seller = { $in: nearbySellerIds };
-    } else {
-      // If no location provided, return empty result (strictly enforce location)
-      return res.status(200).json({
-        success: true,
-        data: [],
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total: 0,
-          pages: 0,
-        },
-        message: "Please provide your location to see products available in your area.",
-      });
     }
 
     // Helper to resolve category/subcategory ID from slug or ID

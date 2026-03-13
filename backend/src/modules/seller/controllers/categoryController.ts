@@ -11,15 +11,14 @@ import { asyncHandler } from "../../../utils/asyncHandler";
  */
 export const getCategories = asyncHandler(
   async (req: Request, res: Response) => {
-    const { includeSubcategories, search } = req.query;
+    const { search } = req.query;
 
-    // Build query - by default, get only parent categories (no parentId)
-    const query: any = { parentId: null };
+    // Build query - get all active categories so seller can assign products correctly
+    // Previously filtered by parentId: null which excluded categories like 'Vegetables', 'dryfruits'
+    const query: any = { status: "Active" };
 
-    // If includeSubcategories is true, get all categories
-    if (includeSubcategories === "true") {
-      delete query.parentId;
-    }
+    // If search is provided, filter by name
+    // (includeSubcategories param kept for backward compatibility but no longer changes behavior)
 
     // Search filter
     if (search) {
