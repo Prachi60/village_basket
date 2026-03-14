@@ -56,7 +56,7 @@ export interface IProduct extends Document {
   // Product Details
   manufacturer?: string;
   madeIn?: string;
-  tax?: string;
+  tax?: mongoose.Types.ObjectId;
   fssaiLicNo?: string;
   totalAllowedQuantity?: number;
 
@@ -255,7 +255,8 @@ const ProductSchema = new Schema<IProduct>(
       trim: true,
     },
     tax: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "Tax",
       trim: true,
     },
     fssaiLicNo: {
